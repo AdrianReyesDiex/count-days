@@ -1,43 +1,167 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-tema="flash">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cuenta regresiva</title>
+<title>Contador para echar a perder la vida</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Rye&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #f6f5f2; --fg: #1d1d1f; --muted: #6e6e73; --card: #fff; --accent: #c2410c; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #111113; --fg: #f2f2f2; --muted: #9a9aa0; --card: #1c1c1f; --accent: #fb923c; }
+  [data-tema="flash"] {
+    --bg: #efe2c4; --ink: #1b1714; --r: #c8102e; --g: #2f7a55; --y: #e7b02a; --w: #fbf5e6;
+    --panel: #fbf5e6; --caja: #fffaf0; --marco: #1b1714; --texto: #1b1714; --tenue: #5c4f42;
+    --acento: #c8102e; --cinta: #c8102e; --cinta-txt: #fbf5e6;
+    --sombra: 8px 8px 0 #1b1714; --brillo: none; --num-sombra: 3px 3px 0 #1b1714;
+    --fondo-op: .55; --fondo-fx: none;
+  }
+  [data-tema="neon"] {
+    --bg: #0b0910; --ink: #ff3e9a; --r: transparent; --g: transparent; --y: transparent; --w: transparent;
+    --panel: rgba(11, 9, 16, .9); --caja: rgba(63, 240, 255, .05); --marco: #3ff0ff; --texto: #f5ecff; --tenue: #b9a8cc;
+    --acento: #3ff0ff; --cinta: #ff3e9a; --cinta-txt: #0b0910;
+    --sombra: 0 0 24px rgba(63, 240, 255, .4); --brillo: 0 0 14px #ff3e9a; --num-sombra: 0 0 12px #3ff0ff;
+    --fondo-op: .4; --fondo-fx: drop-shadow(0 0 3px #ff3e9a);
+  }
+  [data-tema="black"] {
+    --bg: #e6dfd1; --ink: #111; --r: #111; --g: #111; --y: #111; --w: #e6dfd1; --det: #e6dfd1;
+    --panel: #e6dfd1; --caja: #efe9dd; --marco: #111; --texto: #111; --tenue: #4a4540;
+    --acento: #111; --cinta: #111; --cinta-txt: #e6dfd1;
+    --sombra: 8px 8px 0 #111; --brillo: none; --num-sombra: none;
+    --fondo-op: .25; --fondo-fx: none;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-         background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
-  h1 { font-size: clamp(1.4rem, 4vw, 2.2rem); margin: 0 0 .25em; }
-  p { color: var(--muted); margin: 0 0 2em; }
-  #contador { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 640px; margin: 0 auto; }
-  @media (max-width: 480px) { #contador { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .caja { background: var(--card); border-radius: 16px; padding: 20px 8px; }
-  .num { display: block; font-size: clamp(2.2rem, 9vw, 3.6rem); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
-  .lbl { font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  #listo { font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 700; color: var(--accent); }
+         background: var(--bg); color: var(--texto); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
+  .fondo { position: fixed; inset: 0; width: 100%; height: 100%; opacity: var(--fondo-op); filter: var(--fondo-fx); }
+  .k { stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+  .kk { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
+  .lin { fill: none; stroke: var(--y); stroke-width: 5; stroke-linecap: round; }
+  .det { fill: none; stroke: var(--det, var(--ink)); stroke-width: 4; stroke-linecap: round; }
+  .r { fill: var(--r); } .g { fill: var(--g); } .y { fill: var(--y); } .w { fill: var(--w); } .t { fill: var(--ink); } .n { fill: none; }
+  main { position: relative; width: 100%; max-width: 720px; }
+  .temas { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .temas button { font: inherit; font-size: .85rem; font-weight: 600; padding: 6px 14px; border-radius: 999px; cursor: pointer;
+                  border: 2px solid var(--marco); background: var(--panel); color: var(--texto); }
+  .temas button[aria-pressed="true"] { background: var(--marco); color: var(--panel); }
+  .panel { background: var(--panel); border: 4px solid var(--marco); border-radius: 18px; box-shadow: var(--sombra); padding: 28px 20px; }
+  .cinta { display: inline-block; font-family: Rye, serif; font-size: clamp(.85rem, 2.6vw, 1.05rem); padding: 8px 36px;
+           background: var(--cinta); color: var(--cinta-txt); clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); }
+  h1 { font-family: "Pirata One", serif; font-weight: 400; font-size: clamp(2.3rem, 8vw, 4.2rem); line-height: 1; margin: .35em 0 .2em; text-shadow: var(--brillo); }
+  h1 span { color: var(--cinta); }
+  .fecha { color: var(--tenue); margin: 0 0 1.6em; }
+  #contador { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 520px) { #contador { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .caja { background: var(--caja); border: 3px solid var(--marco); border-radius: 12px; padding: 16px 6px 12px; }
+  .num { display: block; font-family: Rye, serif; font-size: clamp(2rem, 8vw, 3.2rem); line-height: 1.15; color: var(--acento); text-shadow: var(--num-sombra); }
+  .lbl { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--tenue); }
+  #listo { font-family: "Pirata One", serif; font-size: clamp(2rem, 7vw, 3.4rem); color: var(--acento); text-shadow: var(--num-sombra); }
+  #frase { font-size: 1.05rem; font-style: italic; min-height: 3em; margin: 1.4em 0 0; }
 </style>
 </head>
 <body>
+<!-- Fondo tipo hoja de "flash" de tatuajes; los colores salen de las variables del tema -->
+<svg class="fondo" aria-hidden="true">
+  <defs>
+    <pattern id="flash" width="420" height="420" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)">
+      <g transform="translate(20 25) rotate(-12 50 50)">
+        <path class="r k" d="M50 88C22 66 8 49 8 31 8 17 19 8 31 8c9 0 16 5 19 13 3-8 10-13 19-13 12 0 23 9 23 23 0 18-14 35-42 57z"/>
+        <path class="w k" d="M-2 40h104l-7 10 7 10H-2l7-10z"/>
+        <text class="t" x="50" y="55" text-anchor="middle" font-family="Rye, serif" font-size="13">MAMÁ</text>
+      </g>
+      <g transform="translate(240 15) rotate(12 50 50)">
+        <path class="kk" d="M50 23V86M30 34h40M16 62c4 20 18 26 34 26s30-6 34-26M59 14a9 9 0 1 1-18 0 9 9 0 1 1 18 0"/>
+        <path class="lin" d="M50 23V86M30 34h40M16 62c4 20 18 26 34 26s30-6 34-26M59 14a9 9 0 1 1-18 0 9 9 0 1 1 18 0"/>
+        <path class="y k" d="M6 70l8-18 12 12zM94 70l-8-18-12 12z"/>
+      </g>
+      <g transform="translate(140 150) rotate(28 50 50)">
+        <path class="w k" d="M41 43h18l-9 55z"/>
+        <rect class="r k" x="44" y="15" width="12" height="20" rx="2"/>
+        <rect class="y k" x="28" y="34" width="44" height="9" rx="4"/>
+        <circle class="y k" cx="50" cy="9" r="6"/>
+      </g>
+      <g transform="translate(300 170) scale(.8)">
+        <polygon class="r k" points="50,8 60,36.3 89.9,37 66.2,55.3 74.7,84 50,67 25.3,84 33.8,55.3 10.1,37 40,36.3"/>
+        <path class="t" d="M50 50 50 8 60 36.3zM50 50 89.9 37 66.2 55.3zM50 50 74.7 84 50 67zM50 50 25.3 84 33.8 55.3zM50 50 10.1 37 40 36.3z"/>
+      </g>
+      <g transform="translate(25 255) rotate(-8 50 50) scale(.85)">
+        <path class="w k" d="M50 10C27 10 14 26 14 46c0 14 8 22 16 25v13c0 4 3 6 7 6h26c4 0 7-2 7-6V71c8-3 16-11 16-25 0-20-13-36-36-36z"/>
+        <ellipse class="t" cx="36" cy="48" rx="9" ry="10"/>
+        <ellipse class="t" cx="64" cy="48" rx="9" ry="10"/>
+        <path class="t" d="M50 58l-5 10h10z"/>
+        <path class="n k" d="M34 78h32M42 78v12M50 78v12M58 78v12"/>
+      </g>
+      <g transform="translate(205 285) rotate(10 50 50) scale(.9)">
+        <path class="g k" d="M40 70C26 62 10 66 4 78c14 6 28 4 36-8zM60 70c14-8 30-4 36 8-14 6-28 4-36-8z"/>
+        <circle class="r k" cx="50" cy="46" r="30"/>
+        <path class="det" d="M50 38a8 8 0 1 1-8 8M36 50a14 14 0 0 0 26 4M30 40a21 21 0 0 0 38 16"/>
+      </g>
+      <g transform="translate(335 305) rotate(14 50 50) scale(.7)">
+        <path class="y k" d="M58 4 22 56h24l-10 40 42-56H52z"/>
+      </g>
+      <path class="y k" d="M175 32l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM395 102l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM120 322l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM300 382l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM55 182l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM395 242l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#flash)"/>
+</svg>
 <main>
-  <h1>Cuenta regresiva</h1>
-  <p>14 de noviembre de 2026 · 12:00 p.m. (hora del Pacífico, Tijuana)</p>
-  <div id="contador" role="timer" aria-live="off">
-    <div class="caja"><span class="num" id="d">0</span><span class="lbl">días</span></div>
-    <div class="caja"><span class="num" id="h">00</span><span class="lbl">horas</span></div>
-    <div class="caja"><span class="num" id="m">00</span><span class="lbl">minutos</span></div>
-    <div class="caja"><span class="num" id="s">00</span><span class="lbl">segundos</span></div>
+  <div class="temas" role="group" aria-label="Temática">
+    <button type="button" data-t="flash">Old School</button>
+    <button type="button" data-t="neon">Neón</button>
+    <button type="button" data-t="black">Blackwork</button>
   </div>
-  <div id="listo" hidden>¡Llegó el día! 🎉</div>
+  <section class="panel">
+    <div class="cinta">Faltan para el tatuaje</div>
+    <h1>Contador para <span>echar a perder</span> la vida</h1>
+    <p class="fecha">14 de noviembre de 2026 · 12:00 p.m. (hora de Tijuana)</p>
+    <div id="contador" role="timer" aria-live="off">
+      <div class="caja"><span class="num" id="d">0</span><span class="lbl">días</span></div>
+      <div class="caja"><span class="num" id="h">00</span><span class="lbl">horas</span></div>
+      <div class="caja"><span class="num" id="m">00</span><span class="lbl">minutos</span></div>
+      <div class="caja"><span class="num" id="s">00</span><span class="lbl">segundos</span></div>
+    </div>
+    <div id="listo" hidden>¡Ya valió! A tatuarse ☠️</div>
+    <p id="frase" aria-live="polite"></p>
+  </section>
 </main>
 <script>
   // Hora fija con offset, así marca lo mismo sin importar la zona horaria de quien lo abra (PST, el horario de verano termina el 1 de nov).
   const META = new Date('2026-11-14T12:00:00-08:00');
+
+  const FRASES = [
+    'Últimos días de piel virgen.',
+    'Tu mamá todavía no lo sabe.',
+    'Aún estás a tiempo de arrepentirte… pero no lo vas a hacer.',
+    'Regla de oro: nada de nombres de la pareja.',
+    'Nada de letras chinas que en realidad dicen «sopa de pollo».',
+    '«Duele poquito», dijeron.',
+    'Es para siempre. Como las deudas.',
+    'En la próxima entrevista de trabajo: manga larga.',
+    'Abuela, si estás leyendo esto: es de henna (no es cierto).',
+    'El tatuador ya está afilando las agujas.',
+    'Faltan menos días que excusas.',
+  ];
+
+  const temas = document.querySelectorAll('[data-t]');
+  function ponTema(t) {
+    document.documentElement.dataset.tema = t;
+    temas.forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
+    try { localStorage.setItem('tema', t); } catch {}
+  }
+  temas.forEach(b => b.onclick = () => ponTema(b.dataset.t));
+  let guardado;
+  try { guardado = localStorage.getItem('tema'); } catch {}
+  ponTema([...temas].some(b => b.dataset.t === guardado) ? guardado : 'flash');
+
+  const frase = document.getElementById('frase');
+  let i = Math.floor(Math.random() * FRASES.length);
+  function otraFrase() {
+    frase.textContent = FRASES[i++ % FRASES.length];
+    frase.animate?.([{ opacity: 0 }, { opacity: 1 }], 600);
+  }
+  otraFrase();
+  const rotador = setInterval(otraFrase, 7000);
 
   function partes(ms) {
     const t = Math.floor(ms / 1000);
@@ -51,6 +175,8 @@
     if (falta <= 0) {
       document.getElementById('contador').hidden = true;
       document.getElementById('listo').hidden = false;
+      frase.hidden = true;
+      clearInterval(rotador);
       return clearInterval(timer);
     }
     const [d, h, m, s] = partes(falta);
